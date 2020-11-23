@@ -1,4 +1,5 @@
 #include "../Headers/main.h"
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -56,6 +57,7 @@ int main(int argc, char *argv[])
 			};
 		
 		//Scrolling arguments to grant chmods from revoked
+		unsigned int lastOptArgIndex = 0;
 		for(i = 1; i < argc - 1; i++)
 		{
 			short int _who = -1;
@@ -73,6 +75,8 @@ int main(int argc, char *argv[])
 				_who = g;
 			else if(strstr(argv[i], "o") != 0)
 				_who = o;
+			else if(strstr(argv[i], "-") != 0)
+				lastOptArgIndex = i;
 			else 
 			{
 				printf("schmod: Neither r, w or x in granting argument: %s\nNo action has been done.", argv[i]);
@@ -105,7 +109,14 @@ int main(int argc, char *argv[])
 			while(what <= x)
 			{
 				//Apply what
-				char launch[100] = "chmod ";
+				char launch[100] = "sudo chmod ";
+				
+				//Applying options to chmods
+				for(i = 1; i <= lastOptArgIndex; i++)
+				{
+					strcat(launch, argv[i]);
+					strcat(launch, " ");
+				}
 
 				//Granting or revoking
 				strcat(launch, _granted[who]);
@@ -120,6 +131,7 @@ int main(int argc, char *argv[])
 				strcat(launch, argv[argc - 1]);
 				
 				//Launching command
+				//printf("%s\n", launch);
 				system(launch);
 			}
 			who++;
